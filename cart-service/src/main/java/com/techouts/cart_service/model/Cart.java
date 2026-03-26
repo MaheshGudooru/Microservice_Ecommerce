@@ -19,7 +19,7 @@ public class Cart {
     @GeneratedValue
     private int id;
 
-    @Column(name = "user_id")
+    @Column(name = "user_id", unique = true)
     private int userId;
 
     @OneToMany(mappedBy = "cartId", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)

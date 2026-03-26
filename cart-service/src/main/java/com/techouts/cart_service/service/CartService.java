@@ -7,13 +7,15 @@ import com.techouts.cart_service.repository.CartRepo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+
 
 @Service
 public class CartService {
 
-    private CartRepo cartRepoImpl;
-    private CartItemRepo cartItemRepoImpl;
+    private final CartRepo cartRepoImpl;
+    private final CartItemRepo cartItemRepoImpl;
 //    private ProductRepo productRepoImpl;
 //    private UserRepo userRepoImpl;
 
@@ -25,69 +27,83 @@ public class CartService {
     @Transactional(readOnly = true)
     public List<CartItem> getCartItemsByUser(int userId) {
 
-        Cart userCart = cartRepoImpl.findByUserId(userId);
-        return userCart.getCartItemList ();
+        Cart userCart = cartRepoImpl.findByUserId(userId).orElse(null);
+
+        if (userCart != null) {
+            return userCart.getCartItemList();
+        }
+
+        return new ArrayList<>();
 
     }
 
-//    public float[] calculateTotalCartPrice(List<CartItem> userCartItems) {
-//
-//        float result = 0;
-//
-//        for (CartItem cartItem : userCartItems) {
-//
-//            int productQuantity = cartItem.getQuantity();
-//            float productPrice = cartItem.getProductId().getPrice();
-//
-//            result = result + (productPrice * productQuantity);
-//
-//        }
-//
-//        return new float[] {(float) (result + (result * 0.18)), (float) (result * 0.18)};
-//
-//    }
+    public Cart createUserCart(int userId) {
+
+        Cart userCart = cartRepoImpl.findByUserId(userId).orElse(null);
+
+        if(userCart != null) {
+            return userCart;
+        }
+
+        Cart newCart = new Cart();
+        newCart.setUserId(userId);
+        newCart.setCartItemList(new ArrayList<>());
+        cartRepoImpl.save(newCart);
+
+        return newCart;
+    }
 
     @Transactional
-    public boolean addToCart(int user, int productId, int quantity) {
+    public boolean addToCart(int userId, int productId, int quantity) {
 
-        // TODO
+        Cart userCart = cartRepoImpl.findByUserId(userId).orElse(null);
 
-        return false;
+        if(quantity <= 0) {
+            return false;
+        }
+
+        if (userCart == null) {
+
+            Cart newlyCreatedCart = createUserCart(userId);
+            newlyCreatedCart.getCartItemList().add(new CartItem(newlyCreatedCart, productId, quantity));
+
+            return true;
+        }
+
+        userCart.getCartItemList().add(new CartItem(userCart, productId, quantity));
+        return true;
+
     }
 
-//    @Transactional
-//    public CartItem removeFromCart(int cartItemId) {
-//
-//        CartItem cartItemInQuestion = cartRepoImpl.getCartItem(cartItemId);
-//
-//        if (cartItemInQuestion == null) {
-//            return null;
-//        }
-//
-//        cartRepoImpl.removeItemFromCart(cartItemInQuestion);
-//
-//        return cartItemInQuestion;
-//
-//    }
-//
-//    @Transactional
-//    public void changeProductQuantity(int cartItemId, boolean isAddition) {
-//
-//        CartItem cartItem = cartRepoImpl.getCartItem(cartItemId);
-//
-//        if (isAddition) {
-//            cartItem.setQuantity(cartItem.getQuantity() + 1);
-//        } else {
-//            cartItem.setQuantity(cartItem.getQuantity() - 1);
-//
-//            if (cartItem.getQuantity() <= 0) {
-//                removeFromCart(cartItemId);
-//                return;
-//            }
-//        }
-//
-//        cartRepoImpl.updateItemInCart(cartItem);
-//
-//    }
 
+    @Transactional
+    public void changeCartItemQuantity(int cartItemId, boolean isAddition) {
+
+        CartItem cartItem = cartItemRepoImpl.findById(cartItemId).orElse(null);
+
+        if (cartItem == null) return;
+
+        if (isAddition) {
+            cartItem.setQuantity(cartItem.getQuantity() + 1);
+        } else {
+            cartItem.setQuantity(cartItem.getQuantity() - 1);
+
+            if (cartItem.getQuantity() <= 0) {
+                removeCartItemFromCart(cartItemId);
+                return;
+            }
+        }
+
+        cartItemRepoImpl.save(cartItem);
+    }
+
+    @Transactional
+    public void removeCartItemFromCart(int cartItemId) {
+        CartItem cartItem = cartItemRepoImpl.findById(cartItemId).orElse(null);
+        if(cartItem == null) return;
+
+        cartRepoImpl.findById(cartItem.getCartId().getId()).orElse(new Cart()).getCartItemList().remove(cartItem);
+        cartItemRepoImpl.delete(cartItem);
+
+    }
 }
