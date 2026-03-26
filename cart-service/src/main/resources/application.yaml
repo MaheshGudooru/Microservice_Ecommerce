@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: cart-service
+  datasource:
+    username: postgres
+    password: 123456
+    url: jdbc:postgresql://localhost:5432/cartdb
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+server:
+  port: 8083
