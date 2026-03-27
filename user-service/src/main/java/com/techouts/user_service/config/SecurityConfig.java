@@ -21,9 +21,13 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // disable for APIs
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/users/register", "/users/login").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest ().permitAll ()
                 );
+//                .formLogin (configurer -> {
+//                    configurer.loginProcessingUrl ("/user/login")
+//                            .usernameParameter ("email")
+//                            .passwordParameter ("password");
+//                });
 
         return http.build();
     }

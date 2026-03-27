@@ -2,7 +2,9 @@ package com.techouts.user_service.controller;
 
 import com.techouts.user_service.model.User;
 import com.techouts.user_service.service.UserService;
+import com.techouts.user_service.utils.JwtUtil;
 import jakarta.validation.Valid;
+import org.bouncycastle.asn1.bc.ObjectData;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -12,13 +14,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/user")
 public class UserController {
 
     private UserService userService;
 
-    UserController(UserService userService) {
+    private JwtUtil jwtUtil;
+
+    UserController(UserService userService, JwtUtil jwtUtil) {
         this.userService = userService;
+        this.jwtUtil = jwtUtil;
     }
 
 
@@ -53,10 +58,23 @@ public class UserController {
     }
 
     @PostMapping("login")
-    public ResponseEntity<?> userLogin() {
-        // TODO
+    public ResponseEntity<Map<String, Object>> userLogin(@RequestParam("email") String email,
+                                                         @RequestParam("password") String password) {
 
-        return null;
+        User userInQuestion = userService.isValidUser (email, password);
+        Map<String, Object> response = new HashMap<> ();
+
+        if(userInQuestion == null) {
+            response.put ("message", "Invalid credentials");
+            return ResponseEntity.status (HttpStatus.BAD_REQUEST).body (response);
+        }
+
+        User user = userService.getUser (email);
+
+        String JWTtoken = jwtUtil.generateToken (user);
+
+        return ResponseEntity.ok (Map.of ("token", JWTtoken));
+
     }
 
 }

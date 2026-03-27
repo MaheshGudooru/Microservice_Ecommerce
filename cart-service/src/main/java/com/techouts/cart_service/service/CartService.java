@@ -16,8 +16,6 @@ public class CartService {
 
     private final CartRepo cartRepoImpl;
     private final CartItemRepo cartItemRepoImpl;
-//    private ProductRepo productRepoImpl;
-//    private UserRepo userRepoImpl;
 
     CartService(CartRepo cartRepoImpl, CartItemRepo cartItemRepoImpl) {
         this.cartRepoImpl = cartRepoImpl;
@@ -37,6 +35,7 @@ public class CartService {
 
     }
 
+    @Transactional
     public Cart createUserCart(int userId) {
 
         Cart userCart = cartRepoImpl.findByUserId(userId).orElse(null);
@@ -77,33 +76,41 @@ public class CartService {
 
 
     @Transactional
-    public void changeCartItemQuantity(int cartItemId, boolean isAddition) {
-
+    public String removeCartItemFromCart(int cartItemId, int userId) {
         CartItem cartItem = cartItemRepoImpl.findById(cartItemId).orElse(null);
 
-        if (cartItem == null) return;
+        if(cartItem == null) return "cart item not found";
 
-        if (isAddition) {
-            cartItem.setQuantity(cartItem.getQuantity() + 1);
-        } else {
-            cartItem.setQuantity(cartItem.getQuantity() - 1);
-
-            if (cartItem.getQuantity() <= 0) {
-                removeCartItemFromCart(cartItemId);
-                return;
-            }
+        if(cartItem.getCartId ().getUserId () != userId) {
+            return "unauthorized";
         }
-
-        cartItemRepoImpl.save(cartItem);
-    }
-
-    @Transactional
-    public void removeCartItemFromCart(int cartItemId) {
-        CartItem cartItem = cartItemRepoImpl.findById(cartItemId).orElse(null);
-        if(cartItem == null) return;
 
         cartRepoImpl.findById(cartItem.getCartId().getId()).orElse(new Cart()).getCartItemList().remove(cartItem);
         cartItemRepoImpl.delete(cartItem);
 
+        return "success";
+
+    }
+
+    @Transactional
+    public String updateCartItemQuantity(int userId, int cartItemId, int quantity) {
+        CartItem cartItem = cartItemRepoImpl.findById(cartItemId).orElse(null);
+
+        if (cartItem == null) return "cart item not found";
+
+        if(cartItem.getCartId ().getUserId () != userId) {
+            return "unauthorized";
+        }
+
+        if(quantity <= 0) {
+            removeCartItemFromCart (cartItemId, userId);
+            return "Cart item removed since quantity is less than zero";
+        }
+
+        cartItem.setQuantity (quantity);
+
+        cartItemRepoImpl.save(cartItem);
+
+        return "cart item quantity successfully updated";
     }
 }

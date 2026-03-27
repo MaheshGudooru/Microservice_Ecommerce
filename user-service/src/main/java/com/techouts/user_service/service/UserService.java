@@ -24,8 +24,20 @@ public class UserService {
     @Transactional(readOnly = true)
     public User getUser(String email) {
 
-        Optional<User> user = userRepoImpl.findByEmail(email);
-        return user.orElseGet(User::new);
+        return userRepoImpl.findByEmail(email).orElse (null);
+
+    }
+
+    @Transactional(readOnly = true)
+    public User isValidUser(String email, String password) {
+
+        User userTryingToLogin = getUser (email);
+
+        if(userTryingToLogin == null || !encoder.matches (password, userTryingToLogin.getPassword ())) {
+            return null;
+        }
+
+        return userTryingToLogin;
 
     }
 
