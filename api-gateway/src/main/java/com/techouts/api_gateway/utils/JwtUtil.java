@@ -21,12 +21,11 @@ public class JwtUtil {
         return !getClaimsFromToken (JWTtoken).getExpiration ().before (new Date ());
     }
 
-    public String[] extractUserIdAndName(String JWTtoken) {
+    public Integer extractUserId(String JWTtoken) {
 
-        String userId = getClaimsFromToken (JWTtoken).get ("X-User-ID", String.class);
-        String userName = getClaimsFromToken (JWTtoken).get ("X-Username", String.class);
+        Integer userId = getClaimsFromToken (JWTtoken).get ("X-User-ID", Integer.class);
 
-        return new String[]{userId, userName};
+        return userId;
     }
 
     private Claims getClaimsFromToken(String JWTtoken) {

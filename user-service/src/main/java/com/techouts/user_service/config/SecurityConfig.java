@@ -23,11 +23,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest ().permitAll ()
                 );
-//                .formLogin (configurer -> {
-//                    configurer.loginProcessingUrl ("/user/login")
-//                            .usernameParameter ("email")
-//                            .passwordParameter ("password");
-//                });
 
         return http.build();
     }

@@ -17,9 +17,9 @@ import java.util.Map;
 @RequestMapping("/user")
 public class UserController {
 
-    private UserService userService;
+    private final UserService userService;
 
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
     UserController(UserService userService, JwtUtil jwtUtil) {
         this.userService = userService;

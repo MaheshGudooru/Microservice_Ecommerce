@@ -74,7 +74,6 @@ public class CartService {
 
     }
 
-
     @Transactional
     public String removeCartItemFromCart(int cartItemId, int userId) {
         CartItem cartItem = cartItemRepoImpl.findById(cartItemId).orElse(null);

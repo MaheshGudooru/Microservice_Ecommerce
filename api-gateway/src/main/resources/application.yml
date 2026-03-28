@@ -9,6 +9,8 @@ spring:
             locator:
               enabled: true
               lower-case-service-id: true
+    config:
+      enabled: false
 
 eureka:
   client:
@@ -17,4 +19,5 @@ eureka:
 
 server:
   port: 8099
+
 
