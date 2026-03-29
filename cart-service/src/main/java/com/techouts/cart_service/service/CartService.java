@@ -1,5 +1,6 @@
 package com.techouts.cart_service.service;
 
+import com.techouts.cart_service.dto.CartItemDTO;
 import com.techouts.cart_service.model.Cart;
 import com.techouts.cart_service.model.CartItem;
 import com.techouts.cart_service.repository.CartItemRepo;
@@ -23,12 +24,22 @@ public class CartService {
     }
 
     @Transactional(readOnly = true)
-    public List<CartItem> getCartItemsByUser(int userId) {
+    public List<CartItemDTO> getCartItemsByUser(int userId) {
 
         Cart userCart = cartRepoImpl.findByUserId(userId).orElse(null);
 
         if (userCart != null) {
-            return userCart.getCartItemList();
+
+            List<CartItem> currUserCartItem = userCart.getCartItemList();
+            List<CartItemDTO> cartItemDTOList = new ArrayList<>();
+            for(CartItem cartItem : currUserCartItem) {
+
+                CartItemDTO cartItemDTO = new CartItemDTO(cartItem.getId(), cartItem.getProductId(), cartItem.getQuantity());
+                cartItemDTOList.add(cartItemDTO);
+
+            }
+            return cartItemDTOList;
+
         }
 
         return new ArrayList<>();

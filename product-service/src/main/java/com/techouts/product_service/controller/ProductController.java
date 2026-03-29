@@ -1,7 +1,7 @@
 package com.techouts.product_service.controller;
 
 
-import com.techouts.product_service.model.Product;
+import com.techouts.product_service.dto.ProductDTO;
 import com.techouts.product_service.service.ProductService;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +12,7 @@ import java.util.Map;
 @RequestMapping("/products")
 public class ProductController {
 
-    private ProductService productService;
+    private final ProductService productService;
 
     ProductController(ProductService productService) {
 
@@ -21,11 +21,9 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public Product getProductById(@PathVariable("id") int id) {
+    public ProductDTO getProductById(@PathVariable("id") int id) {
 
-        Product product = productService.getProduct(id);
-
-        return product;
+        return productService.getProduct(id);
 
     }
 

@@ -1,9 +1,9 @@
 package com.techouts.cart_service.controller;
 
 
+import com.techouts.cart_service.dto.CartItemDTO;
 import com.techouts.cart_service.dto.CartResponseDTO;
 import com.techouts.cart_service.model.Cart;
-import com.techouts.cart_service.model.CartItem;
 import com.techouts.cart_service.service.CartService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,27 +24,18 @@ public class CartController {
     }
 
     @GetMapping
-    public ResponseEntity<Map<String, Object>> serveCartItems(@RequestHeader("X-User-Id") Integer userId) {
+    public ResponseEntity<CartResponseDTO> serveCartItems(@RequestHeader("X-User-Id") Integer userId) {
 
-        List<CartItem> userCartItems = cartService.getCartItemsByUser (userId);
+        List<CartItemDTO> userCartItems = cartService.getCartItemsByUser (userId);
 
-        Map<String, Object> response = new HashMap<> ();
 
         if(userCartItems.isEmpty ()) {
-            response.put ("message", "User cart is empty");
-            return ResponseEntity.status (HttpStatus.NO_CONTENT).body (response);
+            return ResponseEntity.ok(new CartResponseDTO("User cart is empty"));
         }
 
-        response.put("cart items", userCartItems);
-        return ResponseEntity.ok (response);
+        return ResponseEntity.ok (new CartResponseDTO(userCartItems));
 
     }
-//    @GetMapping
-//    public ResponseEntity<Integer> serveCartItems(@RequestHeader("X-User-Id") Integer userId) {
-//
-//        return ResponseEntity.ok (userId);
-//
-//    }
 
     @PostMapping("add")
     public ResponseEntity<String> addProductToCart(@RequestParam("productId") int productId,
@@ -62,22 +53,22 @@ public class CartController {
     }
 
     @PostMapping("create")
-    public ResponseEntity<CartResponseDTO> createCartForUser(@RequestParam("userId") int userId){
+    public ResponseEntity<Map<String, String>> createCartForUser(@RequestParam("userId") int userId){
 
-        Cart cart = cartService.createUserCart (userId);
+        cartService.createUserCart (userId);
 
-        CartResponseDTO responseDTO = new CartResponseDTO (cart.getId (), cart.getUserId ());
-
-        return ResponseEntity.status (HttpStatus.CREATED).body (responseDTO);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Successfully created cart for  the user");
+        return ResponseEntity.status (HttpStatus.CREATED).body (response);
 
     }
 
     @PostMapping("remove")
     public ResponseEntity<String> removeProductFromCart(@RequestParam("cartItemId") int cartItemId, @RequestHeader("X-User-Id") Integer userId) {
 
-        cartService.removeCartItemFromCart(cartItemId, userId);
+        String removalStatus = cartService.removeCartItemFromCart(cartItemId, userId);
 
-        return ResponseEntity.ok("success");
+        return ResponseEntity.ok(removalStatus);
 
     }
 

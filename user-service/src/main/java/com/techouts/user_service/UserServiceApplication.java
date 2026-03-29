@@ -10,6 +10,10 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @EnableFeignClients(basePackages = "com.techouts.user_service.feignclient")
 public class UserServiceApplication {
 
+	static {
+		System.setProperty("user.timezone", "Asia/Kolkata");
+	}
+
 	public static void main(String[] args) {
 		SpringApplication.run(UserServiceApplication.class, args);
 	}

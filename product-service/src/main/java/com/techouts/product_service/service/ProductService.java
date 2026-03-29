@@ -1,6 +1,7 @@
 package com.techouts.product_service.service;
 
 
+import com.techouts.product_service.dto.ProductDTO;
 import com.techouts.product_service.model.Product;
 import com.techouts.product_service.repository.ProductRepo;
 import org.springframework.data.domain.PageRequest;
@@ -22,9 +23,23 @@ public class ProductService {
     }
 
     @Transactional
-    public Product getProduct(int productId) {
+    public ProductDTO getProduct(int productId) {
 
-        return productRepoImpl.findById (productId).orElse (new Product ());
+        Product product =  productRepoImpl.findById (productId).orElse (null);
+
+        if(product == null) {
+            return new ProductDTO("No product exist with this ID");
+        }
+
+        return new ProductDTO(
+                product.getId(),
+                product.getName(),
+                product.getPrice(),
+                product.getProductDescription(),
+                product.getStock(),
+                product.getCategory(),
+                product.getProductImage()
+        );
 
     }
 

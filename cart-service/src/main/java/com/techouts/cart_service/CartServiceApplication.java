@@ -8,6 +8,10 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @EnableFeignClients
 public class CartServiceApplication {
 
+	static {
+		System.setProperty("user.timezone", "Asia/Kolkata");
+	}
+
 	public static void main(String[] args) {
 		SpringApplication.run(CartServiceApplication.class, args);
 	}

@@ -1,5 +1,6 @@
 package com.techouts.cart_service.dto;
 
+import com.techouts.order_service.dto.CartItemDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
