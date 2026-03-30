@@ -103,6 +103,22 @@ public class CartService {
     }
 
     @Transactional
+    public String RemoveAllCartItemsFromCart(int userId) {
+
+        Cart userCart = cartRepoImpl.findByUserId (userId).orElse (null);
+
+        if(userCart == null) {
+            return "Cart does not exist for this user";
+        }
+
+        userCart.getCartItemList ().clear ();
+        cartRepoImpl.save (userCart);
+
+        return "Successfully removed all cart items from the cart";
+
+    }
+
+    @Transactional
     public String updateCartItemQuantity(int userId, int cartItemId, int quantity) {
         CartItem cartItem = cartItemRepoImpl.findById(cartItemId).orElse(null);
 

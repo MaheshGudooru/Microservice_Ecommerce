@@ -1,5 +1,6 @@
 package com.techouts.user_service.controller;
 
+import com.techouts.user_service.dto.UserDTO;
 import com.techouts.user_service.model.User;
 import com.techouts.user_service.service.UserService;
 import com.techouts.user_service.utils.JwtUtil;
@@ -24,6 +25,15 @@ public class UserController {
     UserController(UserService userService, JwtUtil jwtUtil) {
         this.userService = userService;
         this.jwtUtil = jwtUtil;
+    }
+
+    @GetMapping
+    public ResponseEntity<UserDTO> getUserDetails(@RequestHeader("X-User-Id") Integer userId) {
+
+        UserDTO foundUserDTO = userService.getUserById (userId);
+
+        return ResponseEntity.ok (foundUserDTO);
+
     }
 
 

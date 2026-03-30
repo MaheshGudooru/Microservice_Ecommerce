@@ -3,7 +3,6 @@ package com.techouts.cart_service.controller;
 
 import com.techouts.cart_service.dto.CartItemDTO;
 import com.techouts.cart_service.dto.CartResponseDTO;
-import com.techouts.cart_service.model.Cart;
 import com.techouts.cart_service.service.CartService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,37 +37,51 @@ public class CartController {
     }
 
     @PostMapping("add")
-    public ResponseEntity<String> addProductToCart(@RequestParam("productId") int productId,
+    public ResponseEntity<Map<String, String>> addProductToCart(@RequestParam("productId") int productId,
                                                    @RequestParam(name = "quantity", defaultValue = "1", required = false) int quantity,
                                                    @RequestHeader("X-User-Id") Integer userId) {
 
         boolean productAddedToCartStatus = cartService.addToCart(userId, productId, quantity);
 
+        Map<String, String> response = new HashMap<> ();
+
         if (!productAddedToCartStatus) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please provide valid data");
+
+            response.put("message", "Please provide valid data");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
 
-        return ResponseEntity.ok("success");
+        response.put ("message", "Successfully added the product to cart");
 
-    }
-
-    @PostMapping("create")
-    public ResponseEntity<Map<String, String>> createCartForUser(@RequestParam("userId") int userId){
-
-        cartService.createUserCart (userId);
-
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Successfully created cart for  the user");
-        return ResponseEntity.status (HttpStatus.CREATED).body (response);
+        return ResponseEntity.ok(response);
 
     }
 
     @PostMapping("remove")
-    public ResponseEntity<String> removeProductFromCart(@RequestParam("cartItemId") int cartItemId, @RequestHeader("X-User-Id") Integer userId) {
+    public ResponseEntity<Map<String, String>> removeProductFromCart(@RequestParam("cartItemId") int cartItemId,
+                                                                     @RequestHeader("X-User-Id") Integer userId) {
 
         String removalStatus = cartService.removeCartItemFromCart(cartItemId, userId);
 
-        return ResponseEntity.ok(removalStatus);
+        Map<String, String> response = new HashMap<> ();
+
+        if(removalStatus.equals ("unauthorized")) {
+            response.put ("message", "Unauthorized to access other user details");
+            return ResponseEntity.status (HttpStatus.UNAUTHORIZED).body (response);
+        }
+
+        response.put ("message", "Successfully removed product from cart");
+
+        return ResponseEntity.ok(response);
+
+    }
+
+    @PostMapping("empty")
+    public ResponseEntity<CartResponseDTO> emptyUserCart(@RequestHeader("X-User-Id") Integer userId) {
+
+        String cartItemsRemovalStatus = cartService.RemoveAllCartItemsFromCart (userId);
+
+        return ResponseEntity.ok (new CartResponseDTO (cartItemsRemovalStatus));
 
     }
 

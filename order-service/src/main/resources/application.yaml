@@ -1,21 +1,10 @@
 spring:
   application:
     name: order-service
-  datasource:
-    username: postgres
-    password: 123456
-    url: jdbc:postgresql://localhost:5432/orderdb
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: update 
+  cloud:
+    config:
+      uri: http://localhost:8888
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka
-  instance:
-    prefer-ip-address: true
-
-server:
-  port: 8084
+  config:
+    import:
+      - 'configserver:'

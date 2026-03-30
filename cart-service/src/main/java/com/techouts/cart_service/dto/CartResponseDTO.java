@@ -1,6 +1,5 @@
 package com.techouts.cart_service.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,7 +7,6 @@ import java.util.List;
 
 @Setter
 @Getter
-@AllArgsConstructor
 public class CartResponseDTO {
 
     private String message;

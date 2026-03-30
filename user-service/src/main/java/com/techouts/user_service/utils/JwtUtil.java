@@ -23,7 +23,7 @@ public class JwtUtil {
                 .claim ("X-User-ID", user.getId ())
                 .claim ("X-Username", user.getName ())
                 .setIssuedAt (new Date ())
-                .setExpiration (new Date (System.currentTimeMillis () + 1000 * 60 * 30)) // 30 min expiration time
+                .setExpiration (new Date (System.currentTimeMillis () + 1000 * 60 * 60)) // 60 min expiration time
                 .signWith (key, SignatureAlgorithm.HS256)
                 .compact ();
     }

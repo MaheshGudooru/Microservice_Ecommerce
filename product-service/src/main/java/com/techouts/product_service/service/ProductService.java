@@ -69,6 +69,30 @@ public class ProductService {
 
     }
 
+    @Transactional
+    public ProductDTO updateProductStock(int productId, int newStock) {
+
+        Product product = productRepoImpl.findById (productId).orElse (null);
+
+        if(product == null) {
+            return new ProductDTO ("Product does not exist");
+        }
+
+        product.setStock (newStock);
+        productRepoImpl.save (product);
+
+        return new ProductDTO(
+                product.getId(),
+                product.getName(),
+                product.getPrice(),
+                product.getProductDescription(),
+                product.getStock(),
+                product.getCategory(),
+                product.getProductImage()
+        );
+
+    }
+
 
 }
 

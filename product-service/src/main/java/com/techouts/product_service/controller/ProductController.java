@@ -20,7 +20,7 @@ public class ProductController {
 
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("{id}")
     public ProductDTO getProductById(@PathVariable("id") int id) {
 
         return productService.getProduct(id);
@@ -49,6 +49,14 @@ public class ProductController {
         return response;
 
     }
+
+    @PostMapping("update")
+    public ProductDTO updateProductStock(@RequestParam(name = "productId") int productId, @RequestParam(name = "newStock") int newStock) {
+
+        return productService.updateProductStock (productId, newStock);
+
+    }
+
 
 }
 

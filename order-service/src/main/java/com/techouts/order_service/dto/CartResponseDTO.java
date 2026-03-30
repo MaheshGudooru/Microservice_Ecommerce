@@ -1,15 +1,15 @@
-package com.techouts.cart_service.dto;
+package com.techouts.order_service.dto;
 
-import com.techouts.order_service.dto.CartItemDTO;
-import lombok.AllArgsConstructor;
+
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
 
 @Setter
 @Getter
-@AllArgsConstructor
+@NoArgsConstructor
 public class CartResponseDTO {
 
     private String message;

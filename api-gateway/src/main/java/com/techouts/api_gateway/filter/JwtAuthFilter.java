@@ -3,6 +3,7 @@ package com.techouts.api_gateway.filter;
 import com.techouts.api_gateway.utils.JwtUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -30,15 +31,18 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
 
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+    public Mono<Void> filter(ServerWebExchange exchange, @NonNull GatewayFilterChain chain) {
 
         System.out.println("API GATEWAY IS WORKING!!!!!!!!");
 
         String path = exchange.getRequest().getURI().getPath();
 
         // public endpoints don't need user login
-        List<String> excludedURIs = List.of("/user-service/user/login", "/user-service/user/register", "/api/products", "/api/user/login",
-                "/api/user/register");
+        List<String> excludedURIs = List.of(
+                "/api/products",
+                "/api/user/login",
+                "/api/user/register"
+        );
 
         // skip the check for public endpoints
         if (excludedURIs.stream().anyMatch(path::startsWith)) {

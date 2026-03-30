@@ -1,23 +1,19 @@
 package com.techouts.order_service.service;
 
 
-import com.techouts.cart_service.dto.CartResponseDTO;
-import com.techouts.order_service.dto.CartItemDTO;
-import com.techouts.order_service.dto.ProductDTO;
+import com.techouts.order_service.dto.*;
 import com.techouts.order_service.feignclient.CartClient;
 import com.techouts.order_service.feignclient.ProductClient;
 import com.techouts.order_service.model.Order;
 import com.techouts.order_service.model.OrderItem;
 import com.techouts.order_service.repository.OrderItemRepo;
 import com.techouts.order_service.repository.OrderRepo;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
 public class OrderService {
@@ -38,12 +34,12 @@ public class OrderService {
     }
 
     @Transactional
-    public String placeOrder(int userId, String address, float totalPrice, String paymentMethod) {
+    public OrderDTO placeOrder(int userId, String address, String paymentMethod) {
 
         CartResponseDTO response = cartClient.serveCartItems(userId);
 
         if(response.getItems() == null) {
-             return "Cannot place order since cart is empty";
+             return new OrderDTO ("Cannot place order since cart is empty");
         }
 
         List<CartItemDTO> cartItemDTOList = response.getItems();
@@ -57,98 +53,159 @@ public class OrderService {
             if(currProduct.getStock () < cartItem.getQuantity()) {
 
                 if(currProduct.getStock () == 0) {
-                    return currProduct.getName () + " is out of stock";
+                    return new OrderDTO (currProduct.getName () + " is out of stock");
                 }
-                return "Stock available for " + currProduct.getName () + " is " + currProduct.getStock ();
+                return new OrderDTO ("Stock available for " + currProduct.getName () + " is " + currProduct.getStock ());
             }
 
             totalCalculatedPrice += cartItem.getQuantity() * currProduct.getPrice();
 
         }
 
+//        if(totalPrice != totalCalculatedPrice) {
+//            return new OrderDTO ("total price of the cart is incorrect");
+//        }
+
         Order order = new Order(userId, totalCalculatedPrice, LocalDate.now().plusDays(3), paymentMethod, address);
 
-        // CONTINUE FROM HERE CREATED ORDER ENTITY BUT DIDNOT PERSIST IT
+        Order savedOrder = orderRepoImpl.save (order);
 
-        List<CartItem> removedCartItems = cartRepoImpl.clearCart(user.getCart());
+        List<CartItemDTO> cartItemsToBeRemoved = cartClient.serveCartItems (userId).getItems ();
 
-        List<OrderItem> orderItems = new ArrayList<>();
+        if(cartItemsToBeRemoved == null || cartItemsToBeRemoved.isEmpty ()) {
+            return new OrderDTO ("User cart is empty");
+        }
 
-        for (CartItem cartItem : removedCartItems) {
+        List<OrderItem> orderItems = new ArrayList<> ();
 
-            Product currProduct = cartItem.getProductId();
+        List<OrderItemDTO> orderItemDTOList = new ArrayList<> ();
 
-            int updatedStock = currProduct.getStock () - cartItem.getQuantity ();
+        for (CartItemDTO cartItem : cartItemsToBeRemoved) {
+
+            int currProduct = cartItem.getProductId();
+
+            ProductDTO currProductObj = productClient.getProductById (currProduct);
+
+            int updatedStock = currProductObj.getStock () - cartItem.getQuantity ();
 
             if (updatedStock < 0) {
-                throw new RuntimeException("Stock calculation error!");
+                return new OrderDTO ("Stock calculation error!");
             }
 
-            currProduct.setStock (updatedStock);
+            productClient.updateProductStock (currProduct, updatedStock);
 
-            orderItems.add(new OrderItem(
-                    cartItem.getProductId(),
-                    order,
-                    cartItem.getQuantity(),
-                    cartItem.getProductId().getPrice()));
+            orderItems.add(
+                    new OrderItem(
+                        cartItem.getProductId(),
+                        order,
+                        cartItem.getQuantity(),
+                        currProductObj.getPrice ()
+                    )
+            );
+
+            orderItemDTOList.add (
+                    new OrderItemDTO (
+                            cartItem.getProductId (),
+                            order.getId (),
+                            cartItem.getQuantity (),
+                            currProductObj.getPrice ()
+                    )
+            );
 
         }
 
-        order.setOrderItems(orderItems);
+        ResponseEntity<CartResponseDTO> cartResponseDTO = cartClient.emptyUserCart (userId);
 
-        orderRepoImpl.saveOrder(order);
+        if(cartResponseDTO.getStatusCode ().is5xxServerError ()) {
+            return new OrderDTO ("something went wrong while emptying the cart");
+        }
 
-        return "success";
+        savedOrder.setOrderItems(orderItems);
+
+        orderRepoImpl.save(savedOrder);
+
+        return new OrderDTO (orderItemDTOList);
 
     }
 
     @Transactional
-    public Map<Integer, List<OrderItem>> getOrderByUser(int userId) {
+    public List<OrderDTO> getOrderByUser(int userId) {
 
         List<Order> ordersList = orderRepoImpl.findAllByUserId(userId);
 
         if(ordersList == null || ordersList.isEmpty()) {
-            return null;
+            return Collections.emptyList ();
         }
 
-        List<OrderItem> allOrderItemsOfUser = new ArrayList<>();
+        List<OrderDTO> orderDTOList = new ArrayList<> ();
 
         for (Order order : ordersList) {
 
-            allOrderItemsOfUser.addAll(orderItemRepoImpl.findAllByOrderId(order.getId()));
+            List<OrderItem> allOrderItemsOfUser = orderItemRepoImpl.findAllByOrderId(order);
+
+            List<OrderItemDTO> allOrderItemDTOList = new ArrayList<> ();
+
+            for(OrderItem orderItem : allOrderItemsOfUser) {
+
+                allOrderItemDTOList.add (new OrderItemDTO (orderItem.getProductId (), orderItem.getOrderId ().getId (), orderItem.getQuantity (), orderItem.getPurchasedPrice ()));
+
+            }
+
+            orderDTOList.add (new OrderDTO (
+                    "Successfully fetched user orders",
+                    allOrderItemDTOList,
+                    order.getDeliveryStatus (),
+                    order.getFormattedOrderedDate (),
+                    order.getAddress (),
+                    order.getPaymentType ()));
 
         }
 
-        return allOrderItemsOfUser.stream()
-                .collect(Collectors.groupingBy(item -> item.getOrderId().getId()));
+//        return allOrderItemsOfUser.stream()
+//                .collect(Collectors.groupingBy(
+//                        item -> item.getOrderId().getId(),
+//                        Collectors.mapping (
+//                                item -> new OrderItemDTO (item.getProductId (), item.getOrderId ().getId (), item.getQuantity (), item.getPurchasedPrice ()),
+//                                Collectors.toList ()
+//                        )));
+
+        return orderDTOList;
 
     }
 
-//    @Transactional
-//    public void cancelOrder(int orderId) {
-//
-//        Order currOrder = orderRepoImpl.getById(orderId);
-//
-//        List<OrderItem> orderItems = currOrder.getOrderItems ();
-//
-//        for(OrderItem orderItem : orderItems) {
-//
-//            int cancelledOrderStock = orderItem.getQuantity ();
-//            int alreadyPresentProductStock = orderItem.getProductId ().getStock ();
-//
-//            orderItem.getProductId ().setStock (cancelledOrderStock + alreadyPresentProductStock);
-//
-//            productRepoImpl.save (orderItem.getProductId ());
-//
-//            System.out.println("Product ID: " + orderItem.getProductId().getId());
-//            System.out.println("Current Stock: " + alreadyPresentProductStock);
-//            System.out.println("Cancelled Qty: " + cancelledOrderStock);
-//
-//        }
-//
-//        currOrder.setDeliveryStatus("CANCELLED");
-//
-//    }
+    @Transactional
+    public OrderDTO changeOrderStatus(int orderId, String deliveryStatus) {
+
+        Order currOrder = orderRepoImpl.findById (orderId).orElse (null);
+
+        if(currOrder == null) {
+            return new OrderDTO ("Order does not exists or wrong order ID");
+        }
+
+        Set<String> possibleDeliveryStatus = new HashSet<> ();
+        possibleDeliveryStatus.add ("PROCESSING");
+        possibleDeliveryStatus.add ("SHIPPED");
+        possibleDeliveryStatus.add ("IN_TRANSIT");
+        possibleDeliveryStatus.add ("OUT_FOR_DELIVERY");
+        possibleDeliveryStatus.add ("DELIVERED");
+        possibleDeliveryStatus.add ("CANCELLED");
+        possibleDeliveryStatus.add ("REFUNDED");
+        possibleDeliveryStatus.add ("RETURNED");
+
+        if(!possibleDeliveryStatus.contains (deliveryStatus.toUpperCase ())) {
+            return new OrderDTO ("Please provide a valid delivery status");
+        }
+
+        currOrder.setDeliveryStatus (deliveryStatus.toUpperCase ());
+        return new OrderDTO ("Successfully changed the order status to " + deliveryStatus.toUpperCase ());
+
+    }
+
+    public Order getOrderById(int orderId) {
+
+        return orderRepoImpl.findById (orderId).orElse (null);
+
+    }
 
 }
 

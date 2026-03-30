@@ -1,6 +1,7 @@
 package com.techouts.user_service.service;
 
 
+import com.techouts.user_service.dto.UserDTO;
 import com.techouts.user_service.model.User;
 import com.techouts.user_service.repository.UserRepo;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -53,6 +54,24 @@ public class UserService {
         userRepoImpl.save(user);
 
         return true;
+
+    }
+
+    public UserDTO getUserById(int userId) {
+
+        User user = userRepoImpl.findById (userId).orElse (null);
+
+        if(user == null) {
+            return new UserDTO ("User does not exists");
+        }
+
+        return new UserDTO (
+                "User found",
+                user.getId (),
+                user.getName (),
+                user.getEmail (),
+                user.getFormattedJoinedDate ()
+        );
 
     }
 
