@@ -124,7 +124,14 @@ public class OrderService {
 
         orderRepoImpl.save(savedOrder);
 
-        return new OrderDTO (orderItemDTOList);
+        return new OrderDTO (
+                "Order placed successfully",
+                orderItemDTOList,
+                savedOrder.getDeliveryStatus(),
+                savedOrder.getFormattedOrderedDate(),
+                savedOrder.getAddress(),
+                savedOrder.getPaymentType()
+        );
 
     }
 

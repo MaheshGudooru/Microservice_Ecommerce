@@ -80,7 +80,16 @@ public class CartService {
             return true;
         }
 
-        userCart.getCartItemList().add(new CartItem(userCart, productId, quantity));
+        CartItem currCartItem = cartItemRepoImpl.findByProductId(productId).orElse(null);
+
+        if(currCartItem == null) {
+
+            userCart.getCartItemList().add(new CartItem(userCart, productId, quantity));
+            return true;
+
+        }
+
+        currCartItem.setQuantity(quantity);
         return true;
 
     }
