@@ -1,6 +1,8 @@
 package com.techouts.cart_service.service;
 
 import com.techouts.cart_service.dto.CartItemDTO;
+import com.techouts.cart_service.dto.ProductDTO;
+import com.techouts.cart_service.feignclient.ProductClient;
 import com.techouts.cart_service.model.Cart;
 import com.techouts.cart_service.model.CartItem;
 import com.techouts.cart_service.repository.CartItemRepo;
@@ -17,10 +19,12 @@ public class CartService {
 
     private final CartRepo cartRepoImpl;
     private final CartItemRepo cartItemRepoImpl;
+    private final ProductClient productClient;
 
-    CartService(CartRepo cartRepoImpl, CartItemRepo cartItemRepoImpl) {
+    CartService(CartRepo cartRepoImpl, CartItemRepo cartItemRepoImpl, ProductClient productClient) {
         this.cartRepoImpl = cartRepoImpl;
         this.cartItemRepoImpl = cartItemRepoImpl;
+        this.productClient = productClient;
     }
 
     @Transactional(readOnly = true)
@@ -68,7 +72,9 @@ public class CartService {
 
         Cart userCart = cartRepoImpl.findByUserId(userId).orElse(null);
 
-        if(quantity <= 0) {
+        ProductDTO productDTO = productClient.getProductById (productId);
+
+        if(quantity <= 0 || productDTO == null || productDTO.getStock () < quantity) {
             return false;
         }
 
@@ -89,7 +95,7 @@ public class CartService {
 
         }
 
-        currCartItem.setQuantity(quantity);
+        currCartItem.setQuantity(currCartItem.getQuantity () + quantity);
         return true;
 
     }
@@ -139,7 +145,7 @@ public class CartService {
 
         if(quantity <= 0) {
             removeCartItemFromCart (cartItemId, userId);
-            return "Cart item removed since quantity is less than zero";
+            return "Cart item removed since quantity is less than one";
         }
 
         cartItem.setQuantity (quantity);

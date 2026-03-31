@@ -199,6 +199,23 @@ public class OrderService {
         possibleDeliveryStatus.add ("REFUNDED");
         possibleDeliveryStatus.add ("RETURNED");
 
+        if(deliveryStatus.equalsIgnoreCase ("CANCELLED")) {
+            Order userOrder = orderRepoImpl.findById (orderId).orElse (null);
+            if(userOrder == null) {
+                return new OrderDTO ("Order does not exist");
+            }
+
+            List<OrderItem> currUserOrderItems = userOrder.getOrderItems ();
+
+            for(OrderItem orderItem : currUserOrderItems) {
+                ProductDTO productDTO = productClient.getProductById (orderItem.getProductId ());
+
+                productClient.updateProductStock (orderItem.getProductId (), productDTO.getStock () + orderItem.getQuantity ());
+
+            }
+
+        }
+
         if(!possibleDeliveryStatus.contains (deliveryStatus.toUpperCase ())) {
             return new OrderDTO ("Please provide a valid delivery status");
         }

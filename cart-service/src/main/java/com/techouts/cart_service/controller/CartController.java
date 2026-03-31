@@ -47,7 +47,7 @@ public class CartController {
 
         if (!productAddedToCartStatus) {
 
-            response.put("message", "Please provide valid data");
+            response.put("message", "Product does not exist or the product is currently out of stock");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
 
@@ -90,8 +90,13 @@ public class CartController {
                                                               @RequestParam("quantity") int quantity,
                                                               @RequestHeader("X-User-Id") Integer userId) {
 
-        String message = cartService.updateCartItemQuantity (userId, cartItemId, quantity);
         Map<String, Object> response = new HashMap<> ();
+        if(quantity < 0) {
+            response.put ("message", "Please provide a valid quantity");
+            return ResponseEntity.status (HttpStatus.BAD_REQUEST).body (response);
+        }
+
+        String message = cartService.updateCartItemQuantity (userId, cartItemId, quantity);
 
         if(message.contains ("unauthorized")) {
             response.put ("message", "You are not authorized to access this cart");

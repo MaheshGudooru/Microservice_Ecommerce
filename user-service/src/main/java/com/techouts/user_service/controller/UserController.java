@@ -71,8 +71,14 @@ public class UserController {
     public ResponseEntity<Map<String, Object>> userLogin(@RequestParam("email") String email,
                                                          @RequestParam("password") String password) {
 
-        User userInQuestion = userService.isValidUser (email, password);
         Map<String, Object> response = new HashMap<> ();
+
+        if(email == null || password == null || email.isBlank () || password.isBlank ()) {
+            response.put ("message", "please enter email and password");
+            return ResponseEntity.status (HttpStatus.BAD_REQUEST).body (response);
+        }
+
+        User userInQuestion = userService.isValidUser (email, password);
 
         if(userInQuestion == null) {
             response.put ("message", "Invalid credentials");
