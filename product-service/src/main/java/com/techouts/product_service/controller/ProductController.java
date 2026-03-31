@@ -28,23 +28,24 @@ public class ProductController {
     }
 
     @GetMapping
-    public Map<String, Object> getProducts(@RequestParam(name = "page", required = false) Integer pageNo) {
+    public Map<String, Object> getProducts(@RequestParam(name = "page", required = false) Integer pageNo, @RequestParam(name = "category", required = false) String category) {
 
         Map<String, Object> response = new HashMap<> ();
 
         if(pageNo == null) {
 
-            response.put ("products", productService.getProducts (null));
+            response.put ("products", productService.getProducts (category));
             return response;
         }
 
 
-        int totalProductsCnt = productService.getProducts(null).size();
+        int totalProductsCnt = productService.getProducts(category).size();
 
+        int pageIdx = Math.max (0, pageNo);
 
-        response.put("products", productService.getProducts(pageNo));
+        response.put("products", productService.getProducts(pageIdx, category));
         response.put("totalPages", (int) Math.ceil((double) totalProductsCnt / 12));
-        response.put("pageNo", pageNo);
+        response.put("pageNo", pageIdx);
 
         return response;
 

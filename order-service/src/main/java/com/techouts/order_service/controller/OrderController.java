@@ -1,7 +1,6 @@
 package com.techouts.order_service.controller;
 
 import com.techouts.order_service.dto.OrderDTO;
-import com.techouts.order_service.dto.OrderItemDTO;
 import com.techouts.order_service.model.Order;
 import com.techouts.order_service.service.OrderService;
 import jakarta.validation.Valid;
@@ -28,7 +27,7 @@ public class OrderController {
 
         List<OrderDTO> userOrders = orderService.getOrderByUser(userId);
 
-        if(userOrders == null) {
+        if(userOrders == null || userOrders.isEmpty ()) {
             Map<String, String> response = new HashMap<>();
             response.put("message", "User does not have any orders yet");
             return ResponseEntity.ok(response);

@@ -168,14 +168,6 @@ public class OrderService {
 
         }
 
-//        return allOrderItemsOfUser.stream()
-//                .collect(Collectors.groupingBy(
-//                        item -> item.getOrderId().getId(),
-//                        Collectors.mapping (
-//                                item -> new OrderItemDTO (item.getProductId (), item.getOrderId ().getId (), item.getQuantity (), item.getPurchasedPrice ()),
-//                                Collectors.toList ()
-//                        )));
-
         return orderDTOList;
 
     }
@@ -216,12 +208,20 @@ public class OrderService {
 
         }
 
+        if(currOrder.getDeliveryStatus ().equalsIgnoreCase ("CANCELLED") || currOrder.getDeliveryStatus ().equalsIgnoreCase ("RETURNED") || currOrder.getDeliveryStatus ().equalsIgnoreCase ("REFUNDED")) {
+            return new OrderDTO ("Order status cannot be changed since the order is already " + currOrder.getDeliveryStatus ());
+        }
+
         if(!possibleDeliveryStatus.contains (deliveryStatus.toUpperCase ())) {
             return new OrderDTO ("Please provide a valid delivery status");
         }
 
         currOrder.setDeliveryStatus (deliveryStatus.toUpperCase ());
-        return new OrderDTO ("Successfully changed the order status to " + deliveryStatus.toUpperCase ());
+        List<OrderItemDTO> orderItemDTOList = new ArrayList<> ();
+        for(OrderItem orderItem : currOrder.getOrderItems ()) {
+            orderItemDTOList.add (new OrderItemDTO (orderItem.getProductId (), orderItem.getOrderId ().getId (), orderItem.getQuantity (), orderItem.getPurchasedPrice ()));
+        }
+        return new OrderDTO ("Successfully changed the order status to " + deliveryStatus.toUpperCase (), orderItemDTOList, currOrder.getDeliveryStatus (), currOrder.getFormattedOrderedDate (), currOrder.getAddress (), currOrder.getPaymentType ());
 
     }
 
