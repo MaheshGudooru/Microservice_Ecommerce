@@ -1,5 +1,7 @@
 package com.techouts.user_service.controller;
 
+import com.techouts.user_service.dto.LoginRequest;
+import com.techouts.user_service.dto.RegisterRequest;
 import com.techouts.user_service.dto.UserDTO;
 import com.techouts.user_service.model.User;
 import com.techouts.user_service.service.UserService;
@@ -15,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
@@ -38,7 +40,7 @@ public class UserController {
 
 
     @PostMapping("register")
-    public ResponseEntity<Map<String, Object>> registerUser(@Valid @ModelAttribute("user") User user, BindingResult result) {
+    public ResponseEntity<Map<String, Object>> registerUser(@Valid @RequestBody RegisterRequest request, BindingResult result) {
 
 
         if (result.hasErrors()) {
@@ -52,6 +54,8 @@ public class UserController {
             return ResponseEntity.status (HttpStatus.BAD_REQUEST).body (validationErrors);
 
         }
+
+        User user = new User(request.getName(), request.getEmail(), request.getPassword());
 
         boolean userRegistrationStatus = userService.registerUser(user);
 
@@ -68,10 +72,12 @@ public class UserController {
     }
 
     @PostMapping("login")
-    public ResponseEntity<Map<String, Object>> userLogin(@RequestParam("email") String email,
-                                                         @RequestParam("password") String password) {
+    public ResponseEntity<Map<String, Object>> userLogin(@RequestBody LoginRequest request) {
 
         Map<String, Object> response = new HashMap<> ();
+
+        String email = request.getEmail();
+        String password = request.getPassword();
 
         if(email == null || password == null || email.isBlank () || password.isBlank ()) {
             response.put ("message", "please enter email and password");

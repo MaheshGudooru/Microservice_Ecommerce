@@ -1,6 +1,8 @@
 package com.techouts.order_service.controller;
 
 import com.techouts.order_service.dto.OrderDTO;
+import com.techouts.order_service.dto.PlaceOrderRequest;
+import com.techouts.order_service.dto.StatusChangeRequest;
 import com.techouts.order_service.model.Order;
 import com.techouts.order_service.service.OrderService;
 import jakarta.validation.Valid;
@@ -13,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/order")
+@RequestMapping("/orders")
 public class OrderController {
 
     OrderService orderService;
@@ -23,7 +25,7 @@ public class OrderController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> serveOrdersPage(@RequestHeader("X-User-Id") Integer userId) {
+    public ResponseEntity<Object> getOrders(@RequestHeader("X-User-Id") Integer userId) {
 
         List<OrderDTO> userOrders = orderService.getOrderByUser(userId);
 
@@ -37,18 +39,18 @@ public class OrderController {
     }
 
     @PostMapping
-    public OrderDTO placeOrder(@Valid @RequestParam("address") String address,
-                               @Valid @RequestParam("paymentMethod") String paymentMethod,
+    public ResponseEntity<OrderDTO> placeOrder(@RequestBody PlaceOrderRequest request,
                                @RequestHeader("X-User-Id") Integer userId) {
 
-        return orderService.placeOrder (userId, address, paymentMethod);
+        OrderDTO orderDTO =  orderService.placeOrder (userId, request.getAddress(), request.getPaymentMethod());
 
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderDTO);
     }
 
-    @PostMapping("orderstatus")
+    @PatchMapping("/{orderId}/status")
     public ResponseEntity<OrderDTO> changeOrderDeliveryStatus(
-            @RequestParam("orderId") int orderId,
-            @RequestParam("status") String deliveryStatus,
+            @PathVariable int orderId,
+            @RequestBody StatusChangeRequest request,
             @RequestHeader("X-User-Id") Integer userId) {
 
         Order order = orderService.getOrderById (orderId);
@@ -57,7 +59,7 @@ public class OrderController {
             return ResponseEntity.status (HttpStatus.UNAUTHORIZED).body (new OrderDTO ("This order belongs to another user"));
         }
 
-        OrderDTO changedOrderDTO = orderService.changeOrderStatus (orderId, deliveryStatus);
+        OrderDTO changedOrderDTO = orderService.changeOrderStatus (orderId, request.getDeliveryStatus());
 
         return ResponseEntity.ok (changedOrderDTO);
     }
