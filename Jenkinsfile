@@ -12,8 +12,8 @@ pipeline {
 
                     steps {
                         dir('config-server') {
-                            sh 'chmod +x mvnw'
-                            sh './mvnw clean package'
+                            sh 'chmod +x mvnw' // for permission denied since the executable flags are not commited into the repo
+                            sh './mvnw clean package -DskipTests' // to skip tests while building since we are building parallelly and some services depend on eureka server and config server
                         }
 
                         stash name: 'config-server-jar', includes: 'config-server/target/*.jar'
@@ -30,7 +30,7 @@ pipeline {
                     steps {
                         dir('eureka-server') {
                             sh 'chmod +x mvnw'
-                            sh './mvnw clean package'
+                            sh './mvnw clean package -DskipTests'
                         }
 
                         stash name: 'eureka-server-jar', includes: 'eureka-server/target/*.jar'
@@ -48,7 +48,7 @@ pipeline {
                     steps {
                         dir('api-gateway') {
                             sh 'chmod +x mvnw'
-                            sh './mvnw clean package'
+                            sh './mvnw clean package -DskipTests'
                         }
 
                         stash name: 'api-gateway-jar', includes: 'api-gateway/target/*.jar'
@@ -66,7 +66,7 @@ pipeline {
                     steps {
                         dir('product-service') {
                             sh 'chmod +x mvnw'
-                            sh './mvnw clean package'
+                            sh './mvnw clean package -DskipTests'
                         }
 
                         stash name: 'product-service-jar', includes: 'product-service/target/*.jar'
@@ -84,7 +84,7 @@ pipeline {
                     steps {
                         dir('user-service') {
                             sh 'chmod +x mvnw'
-                            sh './mvnw clean package'
+                            sh './mvnw clean package -DskipTests'
                         }
 
                         stash name: 'user-service-jar', includes: 'user-service/target/*.jar'
@@ -102,7 +102,7 @@ pipeline {
                     steps {
                         dir('cart-service') {
                             sh 'chmod +x mvnw'
-                            sh './mvnw clean package'
+                            sh './mvnw clean package -DskipTests'
                         }
 
                         stash name: 'cart-service-jar', includes: 'cart-service/target/*.jar'
@@ -120,7 +120,7 @@ pipeline {
                     steps {
                         dir('order-service') {
                             sh 'chmod +x mvnw'
-                            sh './mvnw clean package'
+                            sh './mvnw clean package -DskipTests'
                         }
 
                         stash name: 'order-service-jar', includes: 'order-service/target/*.jar'
