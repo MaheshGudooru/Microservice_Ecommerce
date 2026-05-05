@@ -39,7 +39,7 @@ pipeline {
                 stage('Api-Gateway') {
                     agent {
                         docker {
-                            image 'eclipse-termin-21-jdk'
+                            image 'eclipse-temurin-21-jdk'
                         }
                     }
 
