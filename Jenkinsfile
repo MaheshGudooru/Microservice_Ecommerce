@@ -6,7 +6,7 @@ pipeline {
                 stage('Config-Server') {
                     agent {
                         docker {
-                            image 'eclipse-temurin-21-jdk'
+                            image 'eclipse-temurin:21-jdk'
                         }
                     }
 
@@ -22,7 +22,7 @@ pipeline {
                 stage('Eureka-Server') {
                     agent {
                         docker {
-                            image 'eclipse-temurin-21-jdk'
+                            image 'eclipse-temurin:21-jdk'
                         }
                     }
 
@@ -39,7 +39,7 @@ pipeline {
                 stage('Api-Gateway') {
                     agent {
                         docker {
-                            image 'eclipse-temurin-21-jdk'
+                            image 'eclipse-temurin:21-jdk'
                         }
                     }
 
@@ -56,7 +56,7 @@ pipeline {
                 stage('Product-Service') {
                     agent {
                         docker {
-                            image 'eclipse-temurin-21-jdk'
+                            image 'eclipse-temurin:21-jdk'
                         }
                     }
 
@@ -73,7 +73,7 @@ pipeline {
                 stage('User-Service') {
                     agent {
                         docker {
-                            image 'eclipse-temurin-21-jdk'
+                            image 'eclipse-temurin:21-jdk'
                         }
                     }
 
@@ -90,7 +90,7 @@ pipeline {
                 stage('Cart-Service') {
                     agent {
                         docker {
-                            image 'eclipse-temurin-21-jdk'
+                            image 'eclipse-temurin:21-jdk'
                         }
                     }
 
@@ -107,7 +107,7 @@ pipeline {
                 stage('Order-Service') {
                     agent {
                         docker {
-                            image 'eclipse-temurin-21-jdk'
+                            image 'eclipse-temurin:21-jdk'
                         }
                     }
 
