@@ -116,7 +116,7 @@ pipeline {
                             sh './mvnw clean package'
                         }
 
-                        stash name: 'Order-service-jar', includes: 'order-service/target/*.jar'
+                        stash name: 'order-service-jar', includes: 'order-service/target/*.jar'
 
                     }
                 }
@@ -132,7 +132,7 @@ pipeline {
                 unstash 'product-service-jar'
                 unstash 'user-service-jar'
                 unstash 'cart-service-jar'
-                unstash 'Order-service-jar'
+                unstash 'order-service-jar'
 
                 echo 'Build and Test stages were a success'
 
