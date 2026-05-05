@@ -112,11 +112,11 @@ pipeline {
                     }
 
                     steps {
-                        dir('Order-service') {
+                        dir('order-service') {
                             sh './mvnw clean package'
                         }
 
-                        stash name: 'Order-service-jar', includes: 'Order-service/target/*.jar'
+                        stash name: 'Order-service-jar', includes: 'order-service/target/*.jar'
 
                     }
                 }
