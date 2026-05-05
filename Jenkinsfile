@@ -12,6 +12,7 @@ pipeline {
 
                     steps {
                         dir('config-server') {
+                            sh 'chmod +x mvnw'
                             sh './mvnw clean package'
                         }
 
@@ -28,6 +29,7 @@ pipeline {
 
                     steps {
                         dir('eureka-server') {
+                            sh 'chmod +x mvnw'
                             sh './mvnw clean package'
                         }
 
@@ -45,6 +47,7 @@ pipeline {
 
                     steps {
                         dir('api-gateway') {
+                            sh 'chmod +x mvnw'
                             sh './mvnw clean package'
                         }
 
@@ -62,6 +65,7 @@ pipeline {
 
                     steps {
                         dir('product-service') {
+                            sh 'chmod +x mvnw'
                             sh './mvnw clean package'
                         }
 
@@ -79,6 +83,7 @@ pipeline {
 
                     steps {
                         dir('user-service') {
+                            sh 'chmod +x mvnw'
                             sh './mvnw clean package'
                         }
 
@@ -96,6 +101,7 @@ pipeline {
 
                     steps {
                         dir('cart-service') {
+                            sh 'chmod +x mvnw'
                             sh './mvnw clean package'
                         }
 
@@ -113,6 +119,7 @@ pipeline {
 
                     steps {
                         dir('order-service') {
+                            sh 'chmod +x mvnw'
                             sh './mvnw clean package'
                         }
 
