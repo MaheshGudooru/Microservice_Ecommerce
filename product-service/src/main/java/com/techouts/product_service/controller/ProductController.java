@@ -21,14 +21,14 @@ public class ProductController {
     }
 
     @GetMapping("{id}")
-    public ProductDTO getProductById(@PathVariable("id") int id) {
+    public ProductDTO getProductById(@PathVariable int id) {
 
         return productService.getProduct(id);
 
     }
 
     @GetMapping
-    public Map<String, Object> getProducts(@RequestParam(name = "page", required = false) Integer pageNo, @RequestParam(name = "category", required = false) String category) {
+    public Map<String, Object> getProducts(@RequestParam(name = "page", required = false) Integer pageNo, @RequestParam(required = false) String category) {
 
         Map<String, Object> response = new HashMap<> ();
 
@@ -52,7 +52,7 @@ public class ProductController {
     }
 
     @PostMapping("update")
-    public ProductDTO updateProductStock(@RequestParam(name = "productId") int productId, @RequestParam(name = "newStock") int newStock) {
+    public ProductDTO updateProductStock(@RequestParam int productId, @RequestParam int newStock) {
 
         return productService.updateProductStock (productId, newStock);
 

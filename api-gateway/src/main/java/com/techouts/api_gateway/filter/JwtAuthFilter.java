@@ -40,8 +40,8 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
         // public endpoints don't need user login
         List<String> excludedURIs = List.of(
                 "/api/products",
-                "/api/user/login",
-                "/api/user/register"
+                "/api/users/login",
+                "/api/users/register"
         );
 
         // skip the check for public endpoints
